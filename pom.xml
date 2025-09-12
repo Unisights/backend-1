@@ -8,10 +8,10 @@
 		<version>3.5.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.unisights </groupId>
-	<artifactId>backend </artifactId>
+	<groupId>com.unisights</groupId>
+	<artifactId>backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>backend </name>
+	<name>backend</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
@@ -83,8 +83,6 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-                </configuration>
-            </plugin>
 		</plugins>
 	</build>
 

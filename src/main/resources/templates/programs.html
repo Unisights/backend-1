@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
+<head>
+    <title>Programs</title>
+</head>
+<body>
+<div th:fragment="content">
+    <h3>Browse Programs</h3>
+    <form id="filters" class="row g-2 mb-3">
+        <div class="col"><input class="form-control" id="country" placeholder="Country (e.g., USA)"></div>
+        <div class="col"><input class="form-control" id="degree" placeholder="Degree (e.g., MS)"></div>
+        <div class="col"><input class="form-control" id="feeMax" placeholder="Max Fee"></div>
+        <div class="col"><input class="form-control" id="q" placeholder="Keyword"></div>
+        <div class="col-auto"><button class="btn btn-primary">Search</button></div>
+    </form>
+    <div id="results"></div>
+
+    <script>
+        async function search(e){
+          e && e.preventDefault();
+          const p=new URLSearchParams();
+          if(country.value) p.append('country',country.value);
+          if(degree.value) p.append('degree',degree.value);
+          if(feeMax.value) p.append('feeMax',feeMax.value);
+          if(q.value) p.append('q',q.value);
+          const r=await fetch('/api/programs?'+p.toString());
+          const data=await r.json();
+          results.innerHTML = data.map(d=>`
+            <div class="card p-3 mb-2">
+              <div class="d-flex justify-content-between">
+                <div><b>${d.title}</b><div class="text-secondary small">${d.university} • ${d.country} • ${d.degree}</div></div>
+                <span class="badge text-bg-light">$${d.fee??'-'}</span>
+              </div>
+              <button class="btn btn-sm btn-outline-primary mt-2">Check & Apply</button>
+            </div>`).join('');
+        }
+        document.getElementById('filters').addEventListener('submit',search);
+        search();
+    </script>
+</div>
+</body>
+</html>

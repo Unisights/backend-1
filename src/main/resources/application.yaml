@@ -3,9 +3,9 @@ spring:
     name: backend
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/unisights
+    url: jdbc:postgresql://localhost:5432/unisights
     username: postgres
-    password: mypassword
+    password: pass
     driver-class-name: org.postgresql.Driver
 
   jpa:

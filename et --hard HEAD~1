@@ -1,0 +1,14 @@
+[33ma7f9707[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32madd-two-files[m[33m)[m Add ProfileController.java and Eligibility.java
+[33m489e40e[m[33m ([m[1;32mfeature/some-feature[m[33m)[m Added Profile and Eligibility APIs
+[33m1138ede[m[33m ([m[1;31mupstream/main[m[33m, [m[1;31mupstream/HEAD[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/feature/profile-api[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m, [m[1;32mfeature/profile-api[m[33m)[m Merge pull request #4 from Unisights/feature-day2-backend
+[33m6091828[m[33m ([m[1;31mupstream/feature-day2-backend[m[33m, [m[1;31morigin/feature-day2-backend[m[33m)[m reverted yaml
+[33m680cfdc[m added frotend day2 tasks
+[33md110d75[m ui works
+[33m391a716[m ui works
+[33m5717cd4[m save changes
+[33m2e47dca[m Add AuthControllerJdbc, CatalogController, EncoderConfig and update configs
+[33m77d6b0c[m Merge pull request #1 from Unisights/feature/mvc
+[33m0285545[m[33m ([m[1;31mupstream/feature/mvc[m[33m, [m[1;31morigin/feature/mvc[m[33m)[m added flyway
+[33m3ebdec7[m mvc
+[33m8d79281[m check
+[33mf83d3f2[m inital setup

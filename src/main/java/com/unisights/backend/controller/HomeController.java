@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class HomeController {
-    @GetMapping("/ra")
+    @GetMapping("/")
     public String home(Model model) {
         model.addAttribute("title", "Unisights");
         return "home";  // looks for templates/home.html

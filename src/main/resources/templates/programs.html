@@ -31,10 +31,22 @@
                 <div><b>${d.title}</b><div class="text-secondary small">${d.university} • ${d.country} • ${d.degree}</div></div>
                 <span class="badge text-bg-light">$${d.fee ?? '-'}</span>
               </div>
-              <button class="btn btn-sm btn-outline-primary mt-2" onclick="checkEligibility(${d.id})">
-                Check eligibility
-              </button>
+               <div class="d-flex gap-2 mt-2">
+                <button class="btn btn-sm btn-outline-primary" onclick="checkEligibility(${d.id})">
+                  Check eligibility
+                </button>
+                <button class="btn btn-sm btn-primary" onclick="applyNow(${d.id})">Apply</button>
+              </div>
             </div>`).join('');
+        }
+        async function applyNow(programId){
+            const r = await fetch('/api/v1/apps', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({ programId })
+            });
+            const app = await r.json();
+            // go to the application page
+            window.location.href = '/app/' + app.id;
         }
 
         async function checkEligibility(programId){

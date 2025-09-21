@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
+<head>
+    <title>Application</title>
+</head>
+<body>
+<div th:fragment="content">
+    <div id="hdr" class="mb-3"></div>
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card p-3">
+                <h5>Checklist</h5>
+                <div id="list"></div>
+            </div>
+            <button class="btn btn-success mt-3" onclick="submitApp()">Submit Application</button>
+            <div id="msg" class="small text-secondary mt-2"></div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card p-3">
+                <h5>Timeline</h5>
+                <ul id="timeline" class="list-group list-group-flush"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const appId = location.pathname.split('/').pop();
+
+        async function load(){
+            const d = await fetch(`/api/v1/apps/${appId}`).then(r=>r.json());
+            document.getElementById('hdr').innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="h5 mb-0">${d.programTitle}</div>
+                        <div class="text-secondary small">${d.university}</div>
+                    </div>
+                    <span class="badge text-bg-secondary">${d.status}</span>
+                </div>`;
+
+            document.getElementById('list').innerHTML = d.checklist.map(it=>`
+                <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                    <div>${it.name} ${it.required?'<span class="badge text-bg-light ms-2">required</span>':''}</div>
+                    <select class="form-select form-select-sm" style="width:140px"
+                            onchange="toggleItem(${d.id},${it.id},this.value)">
+                        <option ${it.status==='PENDING'?'selected':''}>PENDING</option>
+                        <option ${it.status==='DONE'?'selected':''}>DONE</option>
+                    </select>
+                </div>
+            `).join('');
+
+            await loadTimeline();
+        }
+
+        async function loadTimeline(){
+            const t = await fetch(`/api/v1/apps/${appId}/timeline`).then(r=>r.json());
+            document.getElementById('timeline').innerHTML = t.map(
+                e=>`<li class="list-group-item d-flex justify-content-between">
+                       <span>${e.event}</span>
+                       <span class="text-secondary small">${new Date(e.created_at).toLocaleString()}</span>
+                     </li>`).join('');
+        }
+
+        async function toggleItem(appId,itemId,status){
+            await fetch(`/api/v1/apps/${appId}/items/${itemId}/status?status=${status}`,{method:'POST'});
+        }
+
+        async function submitApp(){
+            await fetch(`/api/v1/apps/${appId}/submit`,{method:'POST'});
+            document.getElementById('msg').innerText = 'Submitted';
+            await load(); // refresh header & timeline
+        }
+
+        load();
+    </script>
+</div>
+</body>
+</html>

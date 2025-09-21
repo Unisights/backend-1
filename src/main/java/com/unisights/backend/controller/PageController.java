@@ -9,6 +9,7 @@ public class PageController {
      @GetMapping("/auth/signup") public String signup(){ return "auth/signup"; }
     @GetMapping("/programs")    public String programs(){ return "programs"; }
     @GetMapping("/profile") public String profile(){ return "profile"; }
+    @GetMapping("/app/{id}") public String app(){ return "app"; }
 }
 
 

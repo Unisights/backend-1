@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout(~{::content})">
+<head>
+    <title>My Profile</title>
+</head>
+<body>
+<div th:fragment="content">
+    <main style="max-width:720px;margin:auto">
+        <h3 class="mb-3">My Profile</h3>
+        <form id="profileForm" class="row g-3">
+            <div class="col-md-6"><label class="form-label">Full name</label><input class="form-control" name="full_name"></div>
+            <div class="col-md-6"><label class="form-label">Country</label><input class="form-control" name="country"></div>
+            <div class="col-md-3"><label class="form-label">GPA</label><input class="form-control" name="gpa" type="number" step="0.01"></div>
+            <div class="col-md-3"><label class="form-label">IELTS</label><input class="form-control" name="ielts" type="number" step="0.5"></div>
+            <div class="col-md-3"><label class="form-label">TOEFL</label><input class="form-control" name="toefl" type="number"></div>
+            <div class="col-md-3"><label class="form-label">Budget (USD)</label><input class="form-control" name="budget" type="number"></div>
+            <div><button class="btn btn-primary">Save</button> <span id="msg" class="ms-2 small text-secondary"></span></div>
+        </form>
+    </main>
+    <script>
+        (async function init(){
+            const r = await fetch('/api/v1/profile'); const d = await r.json();
+            for (const k in d){ const el = document.querySelector(`[name="${k}"]`); if(el) el.value = d[k] ?? ''; }
+        })();
+        document.getElementById('profileForm').onsubmit = async (e)=>{
+            e.preventDefault();
+            const fd = new FormData(e.target); const obj = Object.fromEntries(fd.entries());
+            obj.gpa=obj.gpa?+obj.gpa:null; obj.ielts=obj.ielts?+obj.ielts:null; obj.toefl=obj.toefl?+obj.toefl:null; obj.budget=obj.budget?+obj.budget:null;
+            await fetch('/api/v1/profile',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(obj)});
+            document.getElementById('msg').innerText = 'Saved';
+        };
+    </script>
+</div>
+</body>
+</html>

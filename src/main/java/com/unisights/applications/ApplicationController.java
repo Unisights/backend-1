@@ -59,7 +59,7 @@ public class ApplicationController {
 
     @PostMapping("/{appId}/checklist/{itemId}/toggle")
     public ChecklistItem toggle(@PathVariable Long appId, @PathVariable Long itemId){
-        // toggle status
+
         j.update("update checklist_items set status = case when status='DONE' then 'PENDING' else 'DONE' end where id=? and application_id=?", itemId, appId);
 
         return j.queryForObject(

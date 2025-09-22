@@ -14,7 +14,7 @@ public class ApplicationController {
         this.j = j;
     }
 
-    private static final Long CURRENT_USER_ID = 1L; // TODO: replace with JWT later
+    private static final Long CURRENT_USER_ID = 1L;
 
 
     record CreateReq(Long programId) {}
@@ -24,7 +24,7 @@ public class ApplicationController {
 
     @PostMapping
     public AppView create(@RequestBody CreateReq req){
-        // insert application row
+
         Long appId = j.queryForObject(
                 "insert into applications(student_id, program_id) values (?, ?) returning id",
                 Long.class, CURRENT_USER_ID, req.programId());
@@ -50,7 +50,7 @@ public class ApplicationController {
         return detail(appId);
     }
 
-    // 2) Read application
+
     @GetMapping("/{id}")
     public AppView get(@PathVariable Long id){
         return detail(id);
@@ -81,7 +81,7 @@ public class ApplicationController {
         return detail(id);
     }
 
-    // 5) Timeline of events
+
     @GetMapping("/{id}/timeline")
     public List<Map<String,Object>> timeline(@PathVariable Long id){
         return j.query("select event, created_at from app_events where application_id=? order by created_at asc",

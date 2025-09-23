@@ -1,4 +1,4 @@
-package com.unisights.backend.profile;
+package com.unisights.profile;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;

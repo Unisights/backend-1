@@ -12,6 +12,16 @@
                 <h5>Checklist</h5>
                 <div id="list"></div>
             </div>
+
+            <div class="card p-3 mt-3">
+                <h5>Documents</h5>
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <input type="file" name="file" class="form-control mb-2">
+                    <button class="btn btn-outline-secondary">Upload</button>
+                </form>
+                <ul id="docList" class="list-group mt-2"></ul>
+            </div>
+
             <button class="btn btn-success mt-3" onclick="submitApp()">Submit Application</button>
             <div id="msg" class="small text-secondary mt-2"></div>
         </div>
@@ -70,7 +80,27 @@
             await load(); // refresh header & timeline
         }
 
+        document.getElementById('uploadForm').onsubmit = async e => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            fd.append('appId', appId);
+            await fetch('/api/v1/docs/upload', {
+                method: 'POST',
+                body: fd
+            });
+            await loadDocs();
+        };
+
+        async function loadDocs() {
+            const d = await fetch(`/api/v1/docs/${appId}`).then(r => r.json());
+            document.getElementById('docList').innerHTML = d.map(f => `
+                <li class="list-group-item">${f}</li>
+            `).join('');
+        }
+
+
         load();
+        loadDocs();
     </script>
 </div>
 </body>

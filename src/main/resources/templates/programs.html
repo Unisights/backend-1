@@ -7,7 +7,7 @@
 <div th:fragment="content">
     <h3>Browse Programs</h3>
     <form id="filters" class="row g-2 mb-3">
-        <div class="col"><input class="form-control" id="country" placeholder="Country (e.g., USA)"></div>
+        <div class="col"><select class="form-select" id="country"><option value="">Select Country</option></select></div>
         <div class="col"><input class="form-control" id="degree" placeholder="Degree (e.g., MS)"></div>
         <div class="col"><input class="form-control" id="feeMax" placeholder="Max Fee"></div>
         <div class="col"><input class="form-control" id="q" placeholder="Keyword"></div>
@@ -16,6 +16,18 @@
     <div id="results"></div>
 
     <script>
+        (async function loadCountries(){
+            const r = await fetch('/api/v1/countries');
+            const countries = await r.json();
+            const countrySelect = document.getElementById('country');
+            countries.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                countrySelect.appendChild(opt);
+            });
+        })();
+
         async function search(e){
             e && e.preventDefault();
             const p=new URLSearchParams();

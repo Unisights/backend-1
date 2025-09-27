@@ -10,6 +10,8 @@ public class PageController {
     @GetMapping("/programs")    public String programs(){ return "programs"; }
     @GetMapping("/profile") public String profile(){ return "profile"; }
     @GetMapping("/app/{id}") public String app(){ return "app"; }
+    @GetMapping("/consultant") public String consultant() { return "consultant"; }
+
 }
 
 

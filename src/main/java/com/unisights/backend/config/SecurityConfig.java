@@ -39,41 +39,13 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthFilter authFilter;
 
-//    @Bean
-//    SecurityFilterChain security(HttpSecurity http) throws Exception {
-//        http
-//                .csrf(csrf -> csrf.disable())
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/", "/health", "/api/auth/**").permitAll()
-//                        .anyRequest().permitAll()
-//                )
-//                .httpBasic(httpBasic -> {});
-//        return http.build();
-//    }
-
-//    @Bean
-//    public SecurityFilterChain security(HttpSecurity http) throws Exception {
-//        return http.csrf().disable()
-//                .authorizeHttpRequests()
-//                .requestMatchers("/","/health").permitAll()
-//                .and()
-//                .authorizeHttpRequests().requestMatchers("/api/auth/**")
-//                .authenticated().and()
-//                .sessionManagement()
-//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
-//                .authenticationProvider(authenticationProvider())
-//                .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
-//                .build();
-//    }
-
     @Bean
     public SecurityFilterChain security(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/health", "/api/auth/**").permitAll()
+                        .requestMatchers("/", "/health", "/api/auth/**","/auth/login","/auth/signup").permitAll()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

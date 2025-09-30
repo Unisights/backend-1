@@ -1,7 +1,18 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout(~{::content})">
 <head>
-    <title>Consultant Dashboard</title>
+    <div class="d-flex justify-content-between align-items-center">
+        <h3>Consultant Dashboard</h3>
+        <form class="d-flex gap-2" id="cfilters">
+            <select class="form-select form-select-sm" id="cstatus" style="width:160px">
+                <option value="">All</option>
+                <option>SUBMITTED</option><option>REVIEW</option>
+                <option>ACCEPTED</option><option>REJECTED</option>
+            </select>
+            <input class="form-control form-control-sm" id="cq" placeholder="Search program" style="width:220px">
+            <button class="btn btn-sm btn-outline-secondary">Filter</button>
+        </form>
+    </div>
 </head>
 <body>
 <div th:fragment="content">

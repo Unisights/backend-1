@@ -1,47 +1,65 @@
-<html xmlns:th="http://www.thymeleaf.org/" th:replace="layout :: content">
-<main>
-    <div class="d-flex justify-content-between align-items-center">
-        <h3>My Applications</h3>
-        <a href="/programs" class="btn btn-primary">Apply to a program</a>
-    </div>
-
-    <form class="row g-2 my-3" id="sfilters">
-        <div class="col-auto">
-            <select class="form-select" id="sstatus">
-                <option value="">All</option>
-                <option>DRAFT</option><option>SUBMITTED</option>
-                <option>REVIEW</option><option>ACCEPTED</option><option>REJECTED</option>
-            </select>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout(~{::content})">
+<head>
+    <title>My Applications</title>
+</head>
+<body>
+<div th:fragment="content">
+    <main>
+        <div class="d-flex justify-content-between align-items-center">
+            <h3>My Applications</h3>
+            <a href="/programs" class="btn btn-primary">Apply to a program</a>
         </div>
-        <div class="col"><input class="form-control" id="sq" placeholder="Search program"></div>
-        <div class="col-auto"><button class="btn btn-outline-secondary">Filter</button></div>
-    </form>
 
-    <div id="slist"></div>
-</main>
-<script>
-    async function loadS(e){
-      e && e.preventDefault();
-      const p=new URLSearchParams();
-      if(sstatus.value) p.append('status', sstatus.value);
-      if(sq.value) p.append('q', sq.value);
-      const data = await fetch('/api/v1/student/apps?'+p.toString()).then(r=>r.json());
-      slist.innerHTML = data.length ? data.map(x =>
-        <div class="card p-3 mb-2">
-          <div class="d-flex justify-content-between">
-            <div>
-              <b>${x.program_title}</b> — <span class="text-secondary">${x.university}</span>
-              <div class="small text-secondary">Updated: ${new Date(x.updated_at).toLocaleString()}</div>
+        <form class="row g-2 my-3" id="sfilters">
+            <div class="col-auto">
+                <select class="form-select" id="sstatus">
+                    <option value="">All</option>
+                    <option>DRAFT</option>
+                    <option>SUBMITTED</option>
+                    <option>REVIEW</option>
+                    <option>ACCEPTED</option>
+                    <option>REJECTED</option>
+                </select>
             </div>
-            <span class="badge text-bg-secondary">${x.status}</span>
-          </div>
-          <div class="mt-2 d-flex gap-2">
-            <a class="btn btn-sm btn-outline-primary" href="/app/${x.app_id}">Open</a>
-            ${x.status==='DRAFT' ? <a class="btn btn-sm btn-success" href="/app/${x.app_id}">Continue</a> : ``}
-          </div>
-        </div>).join('') : <div class="text-secondary">No applications yet.</div>;
-    }
-    sfilters.addEventListener('submit', loadS);
-    loadS();
-</script>
+            <div class="col">
+                <input class="form-control" id="sq" placeholder="Search program">
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-outline-secondary">Filter</button>
+            </div>
+        </form>
+
+        <div id="slist"></div>
+    </main>
+
+    <script>
+        async function loadS(e){
+            e && e.preventDefault();
+            const p = new URLSearchParams();
+            if(sstatus.value) p.append('status', sstatus.value);
+            if(sq.value) p.append('q', sq.value);
+            const data = await fetch('/api/v1/student/apps?' + p.toString()).then(r => r.json());
+            slist.innerHTML = data.length ? data.map(x => `
+                <div class="card p-3 mb-2">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <b>${x.program_title}</b> — <span class="text-secondary">${x.university}</span>
+                            <div class="small text-secondary">Updated: ${new Date(x.updated_at).toLocaleString()}</div>
+                        </div>
+                        <span class="badge text-bg-secondary">${x.status}</span>
+                    </div>
+                    <div class="mt-2 d-flex gap-2">
+                        <a class="btn btn-sm btn-outline-primary" href="/app/${x.app_id}">Open</a>
+                        ${x.status === 'DRAFT' ? `<a class="btn btn-sm btn-success" href="/app/${x.app_id}">Continue</a>` : ''}
+                    </div>
+                </div>
+            `).join('') : `<div class="text-secondary">No applications yet.</div>`;
+        }
+
+        sfilters.addEventListener('submit', loadS);
+        loadS();
+    </script>
+</div>
+</body>
 </html>

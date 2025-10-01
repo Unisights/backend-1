@@ -1,19 +1,35 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout(~{::content})">
 <head>
-    <title>Consultant Dashboard</title>
+   <title>Consultant Dashboard</title>
 </head>
 <body>
 <div th:fragment="content">
     <main>
-        <h3>Consultant Dashboard</h3>
+        <div class="d-flex justify-content-between align-items-center">
+            <h3>Consultant Dashboard</h3>
+            <form class="d-flex gap-2" id="cfilters">
+                <select class="form-select form-select-sm" id="cstatus" style="width:160px">
+                    <option value="">All</option>
+                    <option>SUBMITTED</option><option>REVIEW</option>
+                    <option>ACCEPTED</option><option>REJECTED</option>
+                </select>
+                <input class="form-control form-control-sm" id="cq" placeholder="Search program" style="width:220px">
+                <button class="btn btn-sm btn-outline-secondary">Filter</button>
+            </form>
+        </div>
         <div id="queue"></div>
     </main>
 
     <script>
-        async function loadQueue(){
-            const data = await fetch('/api/v1/consult/queue').then(r => r.json());
-            queue.innerHTML = data.length ? data.map(x => `
+        async function loadQueue(e){
+          e && e.preventDefault();
+          const p=new URLSearchParams();
+          if(cstatus.value) p.append('status', cstatus.value);
+          if(cq.value) p.append('q', cq.value);
+          const data = await fetch('/api/v1/consult/queue?'+p.toString()).then(r=>r.json());
+          // (render cards exactly like Day 6)
+          queue.innerHTML = data.length ? data.map(x => `
                 <div class="card p-3 mb-2">
                     <div class="d-flex justify-content-between">
                         <div>
@@ -39,7 +55,7 @@
             });
             await loadQueue();
         }
-
+        cfilters && cfilters.addEventListener('submit', loadQueue);
         loadQueue();
     </script>
 </div>

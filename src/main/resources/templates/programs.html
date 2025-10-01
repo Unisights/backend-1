@@ -17,7 +17,8 @@
 
     <script>
         (async function loadCountries(){
-            const r = await fetch('/api/v1/countries');
+            const token = localStorage.getItem("token");
+            const r = await fetch('/api/v1/countries' , headers: {'Authorization':`Bearer ${token}`} );
             const countries = await r.json();
             const countrySelect = document.getElementById('country');
             countries.forEach(c => {
@@ -35,7 +36,8 @@
             if(degree.value) p.append('degree',degree.value);
             if(feeMax.value) p.append('feeMax',feeMax.value);
             if(q.value) p.append('q',q.value);
-            const r=await fetch('/api/programs?'+p.toString());
+            const token = localStorage.getItem("token");
+            const r=await fetch('/api/programs?'+p.toString() , headers: {'Authorization':`Bearer ${token}`});
             const data=await r.json();
             results.innerHTML = data.map(d=>`
             <div class="card p-3 mb-2">
@@ -52,8 +54,9 @@
             </div>`).join('');
         }
         async function applyNow(programId){
+            const token = localStorage.getItem("token");
             const r = await fetch('/api/v1/apps', {
-                method:'POST', headers:{'Content-Type':'application/json'},
+                method:'POST', headers:{'Content-Type':'application/json' , 'Authorization':`Bearer ${token}`},
                 body: JSON.stringify({ programId })
             });
             const app = await r.json();
@@ -63,7 +66,8 @@
 
         async function checkEligibility(programId){
             try {
-                const prof = await fetch('/api/v1/profile').then(r=>r.ok?r.json():{});
+                const token = localStorage.getItem("token");
+                const prof = await fetch('/api/v1/profile' , headers: {'Authorization':`Bearer ${token}`}).then(r=>r.ok?r.json():{});
                 const req = {
                     gpa: (+prof.gpa) || 0,
                     ielts: (+prof.ielts) || 0,
@@ -71,9 +75,10 @@
                     budget: (+prof.budget) || 0,
                     programIds: [programId]
                 };
+                const token = localStorage.getItem("token");
                 const res = await fetch('/api/v1/eligibility/check',{
                     method:'POST',
-                    headers:{'Content-Type':'application/json'},
+                    headers:{'Content-Type':'application/json' , 'Authorization':`Bearer ${token}` },
                     body: JSON.stringify(req)
                 }).then(r=>r.json());
                 const r = res && res[0] ? res[0] : {score:0,eligible:false,reasons:['No data']};

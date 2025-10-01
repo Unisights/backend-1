@@ -27,7 +27,8 @@
           const p=new URLSearchParams();
           if(cstatus.value) p.append('status', cstatus.value);
           if(cq.value) p.append('q', cq.value);
-          const data = await fetch('/api/v1/consult/queue?'+p.toString()).then(r=>r.json());
+          const token = localStorage.getItem("token");
+          const data = await fetch('/api/v1/consult/queue?'+p.toString(), { headers:{'Authorization':`Bearer ${token}`}).then(r=>r.json());
           // (render cards exactly like Day 6)
           queue.innerHTML = data.length ? data.map(x => `
                 <div class="card p-3 mb-2">
@@ -48,9 +49,10 @@
 
         async function decide(appId, decision){
             const feedback = prompt('Feedback (optional):', decision === 'APPROVE' ? 'Looks good' : '');
+            const token = localStorage.getItem("token");
             await fetch('/api/v1/consult/review', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json' , headers:{'Authorization':`Bearer ${token}`},
                 body: JSON.stringify({ applicationId: appId, decision, feedback })
             });
             await loadQueue();

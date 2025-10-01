@@ -71,11 +71,13 @@
         }
 
         async function toggleItem(appId,itemId,status){
-            await fetch(`/api/v1/apps/${appId}/items/${itemId}/status?status=${status}`,{method:'POST'});
+            const token = localStorage.getItem("token");
+            await fetch(`/api/v1/apps/${appId}/items/${itemId}/status?status=${status}`,{method:'POST' , headers:{'Authorization':`Bearer ${token}`});
         }
 
         async function submitApp(){
-            await fetch(`/api/v1/apps/${appId}/submit`,{method:'POST'});
+            const token = localStorage.getItem("token");
+            await fetch(`/api/v1/apps/${appId}/submit`,{method:'POST' , headers:{'Authorization':`Bearer ${token}`});
             document.getElementById('msg').innerText = 'Submitted';
             await load(); // refresh header & timeline
         }
@@ -84,15 +86,18 @@
             e.preventDefault();
             const fd = new FormData(e.target);
             fd.append('appId', appId);
+            const token = localStorage.getItem("token");
             await fetch('/api/v1/docs/upload', {
-                method: 'POST',
+                method: 'POST' ,
+                headers:{'Authorization':`Bearer ${token}`} ,
                 body: fd
             });
             await loadDocs();
         };
 
         async function loadDocs() {
-            const d = await fetch(`/api/v1/docs/${appId}`).then(r => r.json());
+            const token = localStorage.getItem("token");
+            const d = await fetch(`/api/v1/docs/${appId}`, { headers:{'Authorization':`Bearer ${token}`}}).then(r => r.json());
             document.getElementById('docList').innerHTML = d.map(f => `
                 <li class="list-group-item">${f}</li>
             `).join('');

@@ -20,7 +20,7 @@
     <script>
         (async function init(){
             const token = localStorage.getItem("token");
-            const r1 = await fetch('/api/v1/countries' , headers: {'Authorization':`Bearer ${token}`} );
+            const r1 = await fetch('/api/v1/countries' , { headers: {'Authorization':`Bearer ${token}`}} );
             const countries = await r1.json();
             const countrySelect = document.getElementById('countrySelect');
             countries.forEach(c => {
@@ -31,7 +31,7 @@
             });
 
             const token = localStorage.getItem("token");
-            const r2 = await fetch('/api/v1/profile', headers: {'Authorization':`Bearer ${token}`});
+            const r2 = await fetch('/api/v1/profile', { headers: {'Authorization':`Bearer ${token}`}});
             const d = await r2.json();
             for (const k in d){
                 const el = document.querySelector(`[name="${k}"]`);
@@ -47,7 +47,7 @@
             const fd = new FormData(e.target); const obj = Object.fromEntries(fd.entries());
             obj.gpa=obj.gpa?+obj.gpa:null; obj.ielts=obj.ielts?+obj.ielts:null; obj.toefl=obj.toefl?+obj.toefl:null; obj.budget=obj.budget?+obj.budget:null;
             const token = localStorage.getItem("token");
-            await fetch('/api/v1/profile',{method:'PUT',headers:{'Content-Type':'application/json' , 'Authorization':`Bearer ${token}`},body:JSON.stringify(obj)});
+            await fetch('/api/v1/profile',{method:'PUT', headers:{'Content-Type':'application/json' , 'Authorization':`Bearer ${token}`},body:JSON.stringify(obj)});
             document.getElementById('msg').innerText = 'Saved';
         };
     </script>

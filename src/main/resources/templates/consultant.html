@@ -28,7 +28,7 @@
           if(cstatus.value) p.append('status', cstatus.value);
           if(cq.value) p.append('q', cq.value);
           const token = localStorage.getItem("token");
-          const data = await fetch('/api/v1/consult/queue?'+p.toString(), { headers:{'Authorization':`Bearer ${token}`}).then(r=>r.json());
+          const data = await fetch('/api/v1/consult/queue?'+p.toString(), { headers:{'Authorization':`Bearer ${token}`}}).then(r=>r.json());
           // (render cards exactly like Day 6)
           queue.innerHTML = data.length ? data.map(x => `
                 <div class="card p-3 mb-2">

@@ -18,7 +18,7 @@
     <script>
         (async function loadCountries(){
             const token = localStorage.getItem("token");
-            const r = await fetch('/api/v1/countries' , headers: {'Authorization':`Bearer ${token}`} );
+            const r = await fetch('/api/v1/countries' , {headers: {'Authorization':`Bearer ${token}`}} );
             const countries = await r.json();
             const countrySelect = document.getElementById('country');
             countries.forEach(c => {
@@ -37,7 +37,7 @@
             if(feeMax.value) p.append('feeMax',feeMax.value);
             if(q.value) p.append('q',q.value);
             const token = localStorage.getItem("token");
-            const r=await fetch('/api/programs?'+p.toString() , headers: {'Authorization':`Bearer ${token}`});
+            const r=await fetch('/api/programs?'+p.toString() , {headers: {'Authorization':`Bearer ${token}`}});
             const data=await r.json();
             results.innerHTML = data.map(d=>`
             <div class="card p-3 mb-2">
@@ -67,7 +67,7 @@
         async function checkEligibility(programId){
             try {
                 const token = localStorage.getItem("token");
-                const prof = await fetch('/api/v1/profile' , headers: {'Authorization':`Bearer ${token}`}).then(r=>r.ok?r.json():{});
+                const prof = await fetch('/api/v1/profile' , {headers: {'Authorization':`Bearer ${token}`}}).then(r=>r.ok?r.json():{});
                 const req = {
                     gpa: (+prof.gpa) || 0,
                     ielts: (+prof.ielts) || 0,

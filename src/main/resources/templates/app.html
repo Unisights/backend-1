@@ -89,7 +89,7 @@
             const token = localStorage.getItem("token");
             await fetch('/api/v1/docs/upload', {
                 method: 'POST' ,
-                headers:{'Authorization':`Bearer ${token}` ,
+                headers:{'Authorization':`Bearer ${token}`} ,
                 body: fd
             });
             await loadDocs();
@@ -97,7 +97,7 @@
 
         async function loadDocs() {
             const token = localStorage.getItem("token");
-            const d = await fetch(`/api/v1/docs/${appId}`, { headers:{'Authorization':`Bearer ${token}`}).then(r => r.json());
+            const d = await fetch(`/api/v1/docs/${appId}`, { headers:{'Authorization':`Bearer ${token}`}}).then(r => r.json());
             document.getElementById('docList').innerHTML = d.map(f => `
                 <li class="list-group-item">${f}</li>
             `).join('');

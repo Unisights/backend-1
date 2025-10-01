@@ -40,7 +40,7 @@
             if(sstatus.value) p.append('status', sstatus.value);
             if(sq.value) p.append('q', sq.value);
             const token = localStorage.getItem("token");
-            const data = await fetch('/api/v1/student/apps?' + p.toString() , headers: {'Authorization':`Bearer ${token}`} ).then(r => r.json());
+            const data = await fetch('/api/v1/student/apps?' + p.toString() , {headers: {'Authorization':`Bearer ${token}`}}).then(r => r.json());
             slist.innerHTML = data.length ? data.map(x => `
                 <div class="card p-3 mb-2">
                     <div class="d-flex justify-content-between">

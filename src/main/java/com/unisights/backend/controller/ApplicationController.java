@@ -1,5 +1,6 @@
 package com.unisights.backend.controller;
 
+import com.unisights.backend.mail.MailService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,8 +13,11 @@ public class ApplicationController {
 
     private final JdbcTemplate j;
 
-    public ApplicationController(JdbcTemplate j) {
+    private final MailService mail;
+
+    public ApplicationController(JdbcTemplate j, MailService mail) {
         this.j = j;
+        this.mail = mail;
     }
 
     private static final Long CURRENT_USER_ID = 1L; // TODO: replace with JWT later
@@ -99,6 +103,8 @@ public class ApplicationController {
     public void submit(@PathVariable Long id) {
         j.update("update applications set status='SUBMITTED' where id=? and student_id=?", id, CURRENT_USER_ID);
         j.update("insert into app_events(application_id, event) values (?,?)", id, "SUBMITTED");
+        mail.send("consult@demo.com","New Application Submitted",
+                "Student #1 submitted app "+id);
     }
 
     // 5) Timeline

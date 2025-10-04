@@ -1,4 +1,13 @@
 spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: rakeshallampally9600@gmail.com
+    password: jmdejaouppsxsthy
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
   application:
     name: backend
 

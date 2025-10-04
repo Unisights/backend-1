@@ -54,7 +54,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' , headers:{'Authorization':`Bearer ${token}`},
                 body: JSON.stringify({ applicationId: appId, decision, feedback })
-            });
+            }});
             await loadQueue();
         }
         cfilters && cfilters.addEventListener('submit', loadQueue);

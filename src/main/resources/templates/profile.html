@@ -30,8 +30,8 @@
                 countrySelect.appendChild(opt);
             });
 
-            const token = localStorage.getItem("token");
-            const r2 = await fetch('/api/v1/profile', { headers: {'Authorization':`Bearer ${token}`}});
+            const token2 = localStorage.getItem("token");
+            const r2 = await fetch('/api/v1/profile', { headers: {'Authorization':`Bearer ${token2}`}});
             const d = await r2.json();
             for (const k in d){
                 const el = document.querySelector(`[name="${k}"]`);

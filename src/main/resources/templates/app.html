@@ -72,12 +72,12 @@
 
         async function toggleItem(appId,itemId,status){
             const token = localStorage.getItem("token");
-            await fetch(`/api/v1/apps/${appId}/items/${itemId}/status?status=${status}`,{method:'POST' , headers:{'Authorization':`Bearer ${token}`});
+            await fetch(`/api/v1/apps/${appId}/items/${itemId}/status?status=${status}`,{method:'POST' , headers:{'Authorization':`Bearer ${token}`}});
         }
 
         async function submitApp(){
             const token = localStorage.getItem("token");
-            await fetch(`/api/v1/apps/${appId}/submit`,{method:'POST' , headers:{'Authorization':`Bearer ${token}`});
+            await fetch(`/api/v1/apps/${appId}/submit`,{method:'POST' , headers:{'Authorization':`Bearer ${token}`}});
             document.getElementById('msg').innerText = 'Submitted';
             await load(); // refresh header & timeline
         }

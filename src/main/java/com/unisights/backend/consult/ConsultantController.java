@@ -1,5 +1,6 @@
 package com.unisights.backend.consult;
 
+import com.unisights.backend.mail.MailService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
@@ -9,9 +10,11 @@ import java.util.*;
 public class ConsultantController {
 
     private final JdbcTemplate j;
+    private final MailService mail;
 
-    public ConsultantController(JdbcTemplate j) {
+    public ConsultantController(JdbcTemplate j, MailService mail) {
         this.j = j;
+        this.mail = mail;
     }
 
     private static final long DEMO_CONSULTANT_ID = 100L; // TODO: replace with real auth later
@@ -55,5 +58,9 @@ public class ConsultantController {
         j.update("update applications set status = ? where id = ?", next, r.applicationId());
         j.update("insert into app_events(application_id, event) values (?, ?)",
                 r.applicationId(), "DECISION_" + next);
+
+        mail.send("consult@demo.com","Application Decision",
+                "Your application "+r.applicationId()+" is "+next);
+
     }
 }

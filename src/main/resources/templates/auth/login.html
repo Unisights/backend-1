@@ -22,35 +22,90 @@
             </form>
         </div>
     </div>
-</div>
+
 
 <script>
-    document.getElementById('loginForm').onsubmit = async e => {
-        e.preventDefault();
-        const fd = new FormData(e.target);
-        const body = Object.fromEntries(fd.entries());
-        const token = localStorage.getItem("token");
+    // console.log('Login page loaded');
+    // document.getElementById('loginForm').onsubmit = async e => {
+    //     e.preventDefault();
+    //     console.log('Form submitted');
+    //     const fd = new FormData(e.target);
+    //     const body = Object.fromEntries(fd.entries());
+    //     try {
+    //         console.log('Sending request to /api/auth/login'); // Debug log
+    //         const r = await fetch('/api/auth/login', {
+    //             method: 'POST',
+    //             headers: {'Content-Type': 'application/json'},
+    //             body: JSON.stringify(body)
+    //         });
+    //         console.log('Response status:', r.status);  // Debug log
+    //
+    //         if (!r.ok) {
+    //             document.getElementById('msg').innerText = "Invalid";
+    //             return;
+    //         }
+    //
+    //         const d = await r.json();
+    //         console.log('Login success:', d);
+    //         localStorage.setItem("token", d.token);
+    //
+    //         if (d.role === "STUDENT") {
+    //             location.href = "/student";
+    //         } else if (d.role === "CONSULTANT") {
+    //             location.href = "/consultant";
+    //         } else if (d.role === "ADMIN") {
+    //             location.href = "/admin";
+    //         } else {
+    //             document.getElementById('msg').innerText = "Unknown role";
+    //         }
+    //     } catch (error) {
+    //         console.error('Network error:', error);  // Debug log
+    //     }
+    // };
+    console.log('Login page loaded');
+    const form = document.getElementById('loginForm');
+    console.log('Form found:', form ? 'YES' : 'NO');
 
-        const r = await fetch('/api/v1/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' , 'Authorization':`Bearer ${token}` },
-            body: JSON.stringify(body)
-        });
+    if (form) {
+        form.onsubmit = async e => {
+            e.preventDefault();
+            console.log('Form submitted');
+            const fd = new FormData(e.target);
+            const body = Object.fromEntries(fd.entries());
+            try {
+                console.log('Sending request to /api/auth/login');
+                const r = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(body)
+                });
+                console.log('Response status:', r.status);
 
-        if (!r.ok) {
-            document.getElementById('msg').innerText = "Invalid";
-            return;
-        }
+                if (!r.ok) {
+                    document.getElementById('msg').innerText = "Invalid";
+                    return;
+                }
 
-        const d = await r.json();
-        localStorage.setItem("token", d.token);
+                const d = await r.json();
+                console.log('Login success:', d);
+                localStorage.setItem("token", d.token);
 
-        if (d.role === "STUDENT") {
-            location.href = "/student";
-        } else if (d.role === "CONSULTANT") {
-            location.href = "/consultant";
-        }
-    };
+                if (d.role === "STUDENT") {
+                    location.href = "/student";
+                } else if (d.role === "CONSULTANT") {
+                    location.href = "/consultant";
+                } else if (d.role === "ADMIN") {
+                    location.href = "/admin";
+                } else {
+                    document.getElementById('msg').innerText = "Unknown role";
+                }
+            } catch (error) {
+                console.error('Network error:', error);
+            }
+        };
+        console.log('Event handler attached');
+    }
 </script>
+</div>
 </body>
 </html>

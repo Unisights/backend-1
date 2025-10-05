@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
+<head>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+<div th:fragment="content">
+    <main>
+        <h3>Admin</h3>
+        <ul class="nav nav-tabs" id="tabs">
+            <li class="nav-item"><a class="nav-link active" data-tab="overview" href="#">Overview</a></li>
+            <li class="nav-item"><a class="nav-link" data-tab="users" href="#">Users</a></li>
+            <li class="nav-item"><a class="nav-link" data-tab="universities" href="#">Universities</a></li>
+            <li class="nav-item"><a class="nav-link" data-tab="programs" href="#">Programs</a></li>
+        </ul>
+
+        <div id="pane" class="mt-3"></div>
+    </main>
+
+    <script>
+        const token = localStorage.getItem('token'); // must be ADMIN
+
+        function authFetch(url, opts = {}) {
+            return fetch(url, {
+                ...opts,
+                headers: {
+                    ...(opts.headers || {}),
+                    Authorization: 'Bearer ' + token
+                }
+            });
+        }
+
+        async function show(tab) {
+            document.querySelectorAll('#tabs .nav-link').forEach(a => a.classList.remove('active'));
+            document.querySelector(`#tabs .nav-link[data-tab="${tab}"]`).classList.add('active');
+
+            if (tab === 'overview') {
+                const d = await authFetch('/api/v1/admin/overview').then(r => r.json());
+                pane.innerHTML = `
+                    <div class="row g-3">
+                        <div class="col"><div class="card p-3"><div>Students</div><div class="h4">${d.students}</div></div></div>
+                        <div class="col"><div class="card p-3"><div>Consultants</div><div class="h4">${d.consultants}</div></div></div>
+                        <div class="col"><div class="card p-3"><div>Programs</div><div class="h4">${d.programs}</div></div></div>
+                    </div>
+                    <div class="card p-3 mt-3">
+                        <div class="h6 mb-2">Applications</div>
+                        <div>Draft: ${d.apps.draft} | Submitted: ${d.apps.submitted} | Review: ${d.apps.review} | Accepted: ${d.apps.accepted} | Rejected: ${d.apps.rejected}</div>
+                        <a class="btn btn-sm btn-outline-secondary mt-2" href="/api/v1/admin/export/applications.csv" target="_blank">Export CSV</a>
+                    </div>
+                `;
+            }
+
+            if (tab === 'users') {
+                const u = await authFetch('/api/v1/admin/users').then(r => r.json());
+                pane.innerHTML = u.map(x => `
+                    <div class="card p-3 mb-2 d-flex justify-content-between">
+                        <div><b>${x.email}</b> — <span class="text-secondary">${x.role}</span></div>
+                        <div>
+                            <span class="badge ${x.is_active ? 'text-bg-success' : 'text-bg-secondary'}">${x.is_active ? 'active' : 'inactive'}</span>
+                            <button class="btn btn-sm btn-outline-warning ms-2" onclick="toggleUser(${x.id})">Toggle</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            if (tab === 'universities') {
+                const u = await authFetch('/api/v1/admin/catalog/universities').then(r => r.json());
+                pane.innerHTML = `
+                    <form class="row g-2 mb-3" onsubmit="return addUni(event)">
+                        <div class="col"><input class="form-control" id="uname" placeholder="Name"></div>
+                        <div class="col"><input class="form-control" id="ucountry" placeholder="Country"></div>
+                        <div class="col"><input class="form-control" id="ucity" placeholder="City"></div>
+                        <div class="col-auto"><button class="btn btn-primary">Add</button></div>
+                    </form>
+                    ${u.map(x => `<div class="border rounded p-2 mb-2">${x.name} — <span class="text-secondary">${x.country}, ${x.city || ''}</span></div>`).join('')}
+                `;
+            }
+
+            if (tab === 'programs') {
+                const p = await authFetch('/api/v1/admin/catalog/programs').then(r => r.json());
+                pane.innerHTML = `
+                    <form class="row g-2 mb-3" onsubmit="return addProg(event)">
+                        <div class="col"><input class="form-control" id="pid" placeholder="University ID"></div>
+                        <div class="col"><input class="form-control" id="ptitle" placeholder="Title"></div>
+                        <div class="col"><input class="form-control" id="pdegree" placeholder="Degree (MS/BS)"></div>
+                        <div class="col"><input class="form-control" id="pfee" placeholder="Fee"></div>
+                        <div class="col-auto"><button class="btn btn-primary">Add</button></div>
+                    </form>
+                    ${p.map(x => `<div class="border rounded p-2 mb-2">${x.program} — <span class="text-secondary">${x.university}</span> | ${x.degree} | $${x.fee || '-'}</div>`).join('')}
+                `;
+            }
+        }
+
+        async function toggleUser(id) {
+            await authFetch('/api/v1/admin/users/' + id + '/toggle', { method: 'POST' });
+            show('users');
+        }
+
+        window.addEventListener('click', e => {
+            if (e.target.matches('[data-tab]')) {
+                e.preventDefault();
+                show(e.target.getAttribute('data-tab'));
+            }
+        });
+
+        async function addUni(e) {
+            e.preventDefault();
+            await authFetch('/api/v1/admin/catalog/universities', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: uname.value,
+                    country: ucountry.value,
+                    city: ucity.value
+                })
+            });
+            show('universities');
+            return false;
+        }
+
+        async function addProg(e) {
+            e.preventDefault();
+            await authFetch('/api/v1/admin/catalog/programs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    universityId: +pid.value,
+                    title: ptitle.value,
+                    degree: pdegree.value,
+                    fee: +pfee.value || null
+                })
+            });
+            show('programs');
+            return false;
+        }
+
+        show('overview');
+    </script>
+</div>
+</body>
+</html>

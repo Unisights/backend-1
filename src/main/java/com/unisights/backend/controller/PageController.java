@@ -12,6 +12,8 @@ public class PageController {
     @GetMapping("/app/{id}") public String app(){ return "app"; }
     @GetMapping("/consultant") public String consultant() { return "consultant"; }
     @GetMapping("/student") public String student(){ return "student"; }
+    @GetMapping("/admin") public String admin() { return "admin"; }
+
 
 }
 

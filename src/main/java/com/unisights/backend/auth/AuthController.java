@@ -33,14 +33,24 @@ public class AuthController {
 //        return (u!=null && enc.matches(r.password(),u.getPassword_hash()))? "OK":"Invalid";
 //    }
 
-    @PostMapping("/login")
-    public LoginRes login(@RequestBody LoginReq r){
-        // for MVP: hardcode 2 users
-        if(r.email().equals("student@demo.com")){
-            return new LoginRes(jwt.generateToken("STUDENT",1L),"STUDENT",1L);
-        }
-        if(r.email().equals("consult@demo.com")){
-            return new LoginRes(jwt.generateToken("CONSULTANT",100L),"CONSULTANT",100L);
+//    @PostMapping("/login")
+//    public LoginRes login(@RequestBody LoginReq r){
+//        // for MVP: hardcode 2 users
+//        if(r.email().equals("student@demo.com")){
+//            return new LoginRes(jwt.generateToken("STUDENT",1L),"STUDENT",1L);
+//        }
+//        if(r.email().equals("consult@demo.com")){
+//            return new LoginRes(jwt.generateToken("CONSULTANT",100L),"CONSULTANT",100L);
+//        }
+//        throw new RuntimeException("invalid credentials");
+//    }
+
+        @PostMapping("/login") public LoginRes login(@RequestBody LoginReq r){
+        var u=repo.findByEmail(r.email()).orElse(null);
+
+        if(u!=null && enc.matches(r.password(),u.getPassword_hash())){
+            var token=jwt.generateToken(u.getRole().name(), u.getId());
+            return new LoginRes(token,u.getRole().name(),u.getId());
         }
         throw new RuntimeException("invalid credentials");
     }

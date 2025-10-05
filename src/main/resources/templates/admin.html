@@ -86,7 +86,7 @@
                         <div class="col"><input class="form-control" id="pfee" placeholder="Fee"></div>
                         <div class="col-auto"><button class="btn btn-primary">Add</button></div>
                     </form>
-                    ${p.map(x => `<div class="border rounded p-2 mb-2">${x.program} — <span class="text-secondary">${x.university}</span> | ${x.degree} | $${x.fee || '-'}</div>`).join('')}
+                    ${p.map(x => `<div class="border rounded p-2 mb-2">${x.title} — <span class="text-secondary">${x.university}</span> | ${x.degree} | $${x.fee || '-'}</div>`).join('')}
                 `;
             }
         }

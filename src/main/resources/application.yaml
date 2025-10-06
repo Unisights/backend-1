@@ -29,6 +29,16 @@ spring:
     baseline-on-migrate: true
     validate-on-migrate: true
 
+  storage:
+    s3:
+      endpoint: http://localhost:9000
+      accessKey: minioadmin
+      secretKey: minioadmin
+      bucket: unisights
+      region: us-east-1
+      presignExpireSeconds: 300
+
+
 server:
   port: 8080
 

@@ -82,30 +82,45 @@
             await load(); // refresh header & timeline
         }
 
-        document.getElementById('uploadForm').onsubmit = async e => {
-            e.preventDefault();
-            const fd = new FormData(e.target);
-            fd.append('appId', appId);
-            const token = localStorage.getItem("token");
-            await fetch('/api/v1/docs/upload', {
-                method: 'POST' ,
-                headers:{'Authorization':`Bearer ${token}`} ,
-                body: fd
-            });
-            await loadDocs();
-        };
+        document.getElementById('uploadForm').onsubmit = async e=>{
+  e.preventDefault();
+  const file = e.target.file.files[0];
+  if(!file){ return; }
 
-        async function loadDocs() {
-            const token = localStorage.getItem("token");
-            const d = await fetch(`/api/v1/docs/${appId}`, { headers:{'Authorization':`Bearer ${token}`}}).then(r => r.json());
-            document.getElementById('docList').innerHTML = d.map(f => `
-                <li class="list-group-item">${f}</li>
-            `).join('');
-        }
+  // 1) Ask backend for presigned URL
+  const pre = await fetch('/api/v1/docs/presign',{method:'POST',headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({appId, filename:file.name, mime:file.type, size:file.size})}).then(r=>r.json());
 
+  // 2) Upload directly to S3
+  await fetch(pre.url, {method:'PUT', body:file});
 
-        load();
-        loadDocs();
+  // 3) Save metadata
+  await fetch('/api/v1/docs/save',{method:'POST',headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({appId, key:pre.key, filename:file.name, mime:file.type, size:file.size, uploadedBy:1})});
+
+  e.target.reset();
+  await loadDocs();
+};
+
+async function loadDocs(){
+  const d = await fetch(/api/v1/docs/${appId}).then(r=>r.json());
+  docList.innerHTML = d.map(f=>
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <span>${f.original_name} <span class="text-secondary small">(${Math.round((f.size_bytes||0)/1024)} KB)</span></span>
+      <span>
+        <button class="btn btn-sm btn-outline-primary" onclick="previewDoc(${f.id})">Preview</button>
+        <button class="btn btn-sm btn-outline-danger" onclick="deleteDoc(${f.id})">Delete</button>
+      </span>
+    </li>).join('');
+}async function previewDoc(id){
+  const {url} = await fetch(/api/v1/docs/presign-get/${id}).then(r=>r.json());
+  window.open(url, '_blank');
+}
+async function deleteDoc(id){
+  if(!confirm('Delete this file?')) return;
+  await fetch('/api/v1/docs/'+id, {method:'DELETE'});
+  await loadDocs();
+}
     </script>
 </div>
 </body>

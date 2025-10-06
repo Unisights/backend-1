@@ -32,7 +32,14 @@ spring:
 server:
   port: 8080
 
-
+storage:
+  s3:
+    endpoint: http://localhost:9100
+    accessKey: minioadmin
+    secretKey: minioadmin
+    bucket: unisights
+    region: us-east-1
+    presignExpireSeconds: 300
 
 jwt:
   secret: your-very-long-secret-key-at-least-256-bits-long-please-change-this-in-production

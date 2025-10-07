@@ -18,7 +18,7 @@ public class CatalogController {
         this.j = j;
     }
 
-    // 🟢 MAIN PROGRAM LIST (with filters, pagination, sorting)
+
     @GetMapping
     public List<ProgramView> list(
             @RequestParam(required = false) String country,
@@ -68,7 +68,7 @@ public class CatalogController {
                 limit, offset);
     }
 
-    // ✅ CACHED: List of unique countries
+  
     @Cacheable("countries")
     @GetMapping("/countries")
     public List<String> listCountries() {
@@ -76,7 +76,7 @@ public class CatalogController {
         return j.queryForList(sql, String.class);
     }
 
-    // ✅ CACHED: List of unique degrees
+   
     @Cacheable("degrees")
     @GetMapping("/degrees")
     public List<String> listDegrees() {
@@ -84,7 +84,7 @@ public class CatalogController {
         return j.queryForList(sql, String.class);
     }
 
-    // ✅ CACHED: Total number of programs
+  
     @Cacheable("programCount")
     @GetMapping("/count")
     public Integer getProgramCount() {

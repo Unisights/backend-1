@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout(~{::content})">
 <head>
     <title>My Applications</title>
@@ -60,6 +60,138 @@
 
         sfilters.addEventListener('submit', loadS);
         loadS();
+    </script>
+</div>
+</body>
+</html>-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout(~{::content})">
+<head>
+    <title>My Applications</title>
+</head>
+<body>
+<div th:fragment="content">
+    <main>
+        <div class="d-flex justify-content-between align-items-center">
+            <h3>My Applications</h3>
+            <a href="/programs" class="btn btn-primary">Apply to a program</a>
+        </div>
+
+        <!-- Filters -->
+        <form class="row g-2 my-3" id="sfilters">
+            <div class="col-auto">
+                <select class="form-select" id="sstatus">
+                    <option value="">All</option>
+                    <option>DRAFT</option>
+                    <option>SUBMITTED</option>
+                    <option>REVIEW</option>
+                    <option>ACCEPTED</option>
+                    <option>REJECTED</option>
+                </select>
+            </div>
+            <div class="col">
+                <input class="form-control" id="sq" placeholder="Search program">
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-outline-secondary">Filter</button>
+            </div>
+        </form>
+
+        <!-- Pagination + Sorting Controls (Day 11) -->
+        <form id="spager" class="d-flex align-items-center gap-2 mb-2">
+            <select id="ssort" class="form-select form-select-sm" style="width:160px">
+                <option value="updated_at">Updated</option>
+                <option value="status">Status</option>
+            </select>
+            <select id="sdir" class="form-select form-select-sm" style="width:120px">
+                <option value="asc">Asc</option>
+                <option value="desc">Desc</option>
+            </select>
+            <select id="ssize" class="form-select form-select-sm" style="width:100px">
+                <option>10</option><option>20</option><option>50</option>
+            </select>
+            <button class="btn btn-sm btn-outline-secondary" id="sprev">Prev</button>
+            <span id="spageno" class="small">1</span>
+            <button class="btn btn-sm btn-outline-secondary" id="snext">Next</button>
+        </form>
+
+        <!-- Results -->
+        <div id="slist"></div>
+    </main>
+
+    <!-- JS: Pagination, Sorting, Search + safeFetch (Day 11) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', ()=> {
+            let spage = 1;
+
+            const sstatusEl = document.getElementById('sstatus');
+            const sqEl = document.getElementById('sq');
+            const slistEl = document.getElementById('slist');
+
+            const ssortEl = document.getElementById('ssort');
+            const sdirEl = document.getElementById('sdir');
+            const ssizeEl = document.getElementById('ssize');
+            const sprevBtn = document.getElementById('sprev');
+            const snextBtn = document.getElementById('snext');
+            const spagenoEl = document.getElementById('spageno');
+
+            async function loadS(e){
+                e && e.preventDefault();
+                const p = new URLSearchParams();
+                if(sstatusEl.value) p.append('status', sstatusEl.value);
+                if(sqEl.value) p.append('q', sqEl.value);
+                p.append('page', spage);
+                p.append('size', ssizeEl.value);
+                p.append('sort', ssortEl.value);
+                p.append('dir', sdirEl.value);
+
+                const token = localStorage.getItem("token");
+                try {
+                    const r = await safeFetch('/api/v1/student/apps?' + p.toString(),
+                                               {headers: {'Authorization': `Bearer ${token}`}});
+                    const data = await r.json();
+                    slistEl.innerHTML = data.length ? data.map(x => `
+                        <div class="card p-3 mb-2">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <b>${x.program_title}</b> — <span class="text-secondary">${x.university}</span>
+                                    <div class="small text-secondary">Updated: ${new Date(x.updated_at).toLocaleString()}</div>
+                                </div>
+                                <span class="badge text-bg-secondary">${x.status}</span>
+                            </div>
+                            <div class="mt-2 d-flex gap-2">
+                                <a class="btn btn-sm btn-outline-primary" href="/app/${x.app_id}">Open</a>
+                                ${x.status === 'DRAFT' ? `<a class="btn btn-sm btn-success" href="/app/${x.app_id}">Continue</a>` : ''}
+                            </div>
+                        </div>
+                    `).join('') : `<div class="text-secondary">No applications yet.</div>`;
+
+                    // update pager
+                    spagenoEl.textContent = spage;
+                    sprevBtn.disabled = spage <= 1;
+                    snextBtn.disabled = data.length < Number(ssizeEl.value);
+
+                } catch(err){
+                    console.error(err);
+                }
+            }
+
+            // Pagination buttons
+            sprevBtn.addEventListener('click', e=>{ e.preventDefault(); if(spage>1){ spage--; loadS(); }});
+            snextBtn.addEventListener('click', e=>{ e.preventDefault(); spage++; loadS(); });
+
+            // Reset page when sort/dir/size changes
+            [ssortEl, sdirEl, ssizeEl].forEach(el=>el.addEventListener('change', ()=>{
+                spage = 1; loadS();
+            }));
+
+            // Reset page when filters/search changes
+            sfilters.addEventListener('submit', e=>{ spage = 1; loadS(e); });
+            sqEl.addEventListener('input', ()=>{ spage = 1; loadS(); });
+
+            // Initial load
+            loadS();
+        });
     </script>
 </div>
 </body>

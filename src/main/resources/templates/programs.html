@@ -13,8 +13,113 @@
         <div class="col"><input class="form-control" id="q" placeholder="Keyword"></div>
         <div class="col-auto"><button class="btn btn-primary">Search</button></div>
     </form>
-    <div id="results"></div>
+    <form id="pager" class="d-flex align-items-center gap-2 mb-2" onsubmit="return false;">
+        <input id="q" class="form-control form-control-sm" placeholder="Search title..." style="width:220px">
+        <select id="sort" class="form-select form-select-sm" style="width:160px">
+            <option value="title">Title</option>
+            <option value="university">University</option>
+            <option value="degree">Degree</option>
+            <option value="fee">Fee</option>
+        </select>
+        <select id="dir" class="form-select form-select-sm" style="width:100px">
+            <option value="asc">Asc</option><option value="desc">Desc</option>
+        </select>
+        <select id="size" class="form-select form-select-sm" style="width:80px">
+            <option>10</option><option>20</option><option>50</option>
+        </select>
 
+        <button id="prev" class="btn btn-sm btn-outline-secondary">Prev</button>
+        <span id="pageno" class="small">1</span>
+        <button id="next" class="btn btn-sm btn-outline-secondary">Next</button>
+    </form>
+    <script>
+        const results = document.getElementById('results');
+        const q = document.getElementById('q');
+        const sort = document.getElementById('sort');
+        const dir = document.getElementById('dir');
+        const sizeEl = document.getElementById('size');
+        const prev = document.getElementById('prev');
+        const next = document.getElementById('next');
+        const pageno = document.getElementById('pageno');
+
+        let page = 1;
+
+        function renderPrograms(list) {
+          if (!list || list.length === 0) {
+            results.innerHTML = '<div class="text-muted">No results</div>';
+            return;
+          }
+          results.innerHTML = list.map(p => `
+            <div class="card mb-2">
+              <div class="card-body p-2">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <strong>${escapeHtml(p.title)}</strong>
+                    <div class="small text-muted">${escapeHtml(p.university)} — ${escapeHtml(p.country)}</div>
+                    <div class="small">${escapeHtml(p.degree)}</div>
+                  </div>
+                  <div class="text-end">
+                    <div class="fw-bold">${p.fee == null ? '-' : '₹' + p.fee}</div>
+                    <div class="small text-muted">Program ID: ${p.id}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        function escapeHtml(str) {
+          if (str == null) return '';
+          return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+        }
+
+        async function load() {
+          pageno.textContent = page;
+          const params = new URLSearchParams();
+          if (q.value) params.append('q', q.value);
+          params.append('page', page);
+          params.append('size', sizeEl.value || 10);
+          params.append('sort', sort.value);
+          params.append('dir', dir.value);
+
+          try {
+            // show loading
+            results.innerHTML = '<div class="text-center py-4">Loading…</div>';
+            const r = await safeFetch('/api/programs?' + params.toString());
+            const data = await r.json();
+            renderPrograms(data);
+
+            // disable prev/next appropriately
+            prev.disabled = page <= 1;
+            // If returned less than requested size -> assume no more pages
+            next.disabled = !(Array.isArray(data) && data.length >= Number(sizeEl.value));
+          } catch (err) {
+            // safeFetch already showed toast; keep previous content or show error state
+            results.innerHTML = '<div class="text-danger">Failed to load results</div>';
+          }
+        }
+
+        // controls
+        prev.addEventListener('click', e => { e.preventDefault(); if (page>1) { page--; load(); }});
+        next.addEventListener('click', e => { e.preventDefault(); page++; load(); });
+        sort.addEventListener('change', ()=>{ page = 1; load(); });
+        dir.addEventListener('change', ()=>{ page = 1; load(); });
+        sizeEl.addEventListener('change', ()=>{ page = 1; load(); });
+
+        // debounce search input so you don't spam server
+        function debounce(fn, wait=300){
+          let t;
+          return (...args) => { clearTimeout(t); t = setTimeout(()=> fn(...args), wait); };
+        }
+        q.addEventListener('input', debounce(()=>{ page = 1; load(); }, 400));
+        q.addEventListener('keydown', (e)=> { if (e.key === 'Enter') { e.preventDefault(); page = 1; load(); }});
+
+        // initial load
+        load();
+    </script>
+
+
+    <div id="results"></div>
     <script>
         (async function loadCountries(){
             const token = localStorage.getItem("token");

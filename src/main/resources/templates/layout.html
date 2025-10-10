@@ -21,5 +21,25 @@
         <!-- Content will be replaced -->
     </div>
 </main>
+
+<!--<div id="toast" class="position-fixed bottom-0 end-0 m-3 alert d-none"></div>-->
+<!--<script>-->
+<!--    function toast(msg, type='danger'){-->
+<!--        const t = document.getElementById('toast');-->
+<!--        t.className = 'position-fixed bottom-0 end-0 m-3 alert alert-' + type + ' d-block';-->
+<!--        t.innerText = msg;-->
+<!--        setTimeout(() => { t.className = 'position-fixed bottom-0 end-0 m-3 alert d-none'; }, 3000);-->
+<!--    }-->
+<!--    async function safeFetch(url, opts){-->
+<!--        const r = await fetch(url, opts);-->
+<!--        if(!r.ok){-->
+<!--            try{ const e = await r.json(); toast(e.error || 'Error'); }catch{ toast('Error'); }-->
+<!--            throw new Error('Request failed');-->
+<!--        }-->
+<!--        return r;-->
+<!--    }-->
+<!--</script>-->
+
+
 </body>
 </html>

@@ -13,12 +13,37 @@
         <div class="col"><input class="form-control" id="q" placeholder="Keyword"></div>
         <div class="col-auto"><button class="btn btn-primary">Search</button></div>
     </form>
+
+    <!-- Pagination and Sorting Controls -->
+    <form id="pager" class="d-flex align-items-center gap-2 mb-2">
+        <select id="sort" class="form-select form-select-sm" style="width:160px">
+            <option value="title">Title</option>
+            <option value="university">University</option>
+            <option value="degree">Degree</option>
+            <option value="fee">Fee</option>
+        </select>
+        <select id="dir" class="form-select form-select-sm" style="width:120px">
+            <option value="asc">Asc</option>
+            <option value="desc">Desc</option>
+        </select>
+        <select id="size" class="form-select form-select-sm" style="width:100px">
+            <option>10</option>
+            <option>20</option>
+            <option>50</option>
+        </select>
+        <button class="btn btn-sm btn-outline-secondary" id="prev" type="button">Prev</button>
+        <span id="pageno" class="small">1</span>
+        <button class="btn btn-sm btn-outline-secondary" id="next" type="button">Next</button>
+    </form>
+
     <div id="results"></div>
 
     <script>
+        let page = 1;
+
         (async function loadCountries(){
             const token = localStorage.getItem("token");
-            const r = await fetch('/api/v1/countries' , {headers: {'Authorization':`Bearer ${token}`}} );
+            const r = await fetch('/api/v1/countries', {headers: {'Authorization':`Bearer ${token}`}});
             const countries = await r.json();
             const countrySelect = document.getElementById('country');
             countries.forEach(c => {
@@ -29,17 +54,22 @@
             });
         })();
 
-        async function search(e){
-            e && e.preventDefault();
-            const p=new URLSearchParams();
-            if(country.value) p.append('country',country.value);
-            if(degree.value) p.append('degree',degree.value);
-            if(feeMax.value) p.append('feeMax',feeMax.value);
-            if(q.value) p.append('q',q.value);
+        async function load(){
+            const params = new URLSearchParams();
+            if(country.value) params.append("country", country.value);
+            if(degree.value) params.append("degree", degree.value);
+            if(feeMax.value) params.append("feeMax", feeMax.value);
+            if(q.value) params.append("q", q.value);
+            params.append("page", page);
+            params.append("size", size.value);
+            params.append("sort", sort.value);
+            params.append("dir", dir.value);
+
             const token = localStorage.getItem("token");
-            const r=await fetch('/api/programs?'+p.toString() , {headers: {'Authorization':`Bearer ${token}`}});
-            const data=await r.json();
-            results.innerHTML = data.map(d=>`
+            const r = await fetch("/api/programs?" + params.toString(), {headers: {'Authorization':`Bearer ${token}`}});
+            const data = await r.json();
+
+            results.innerHTML = data.map(d => `
             <div class="card p-3 mb-2">
               <div class="d-flex justify-content-between">
                 <div><b>${d.title}</b><div class="text-secondary small">${d.university} • ${d.country} • ${d.degree}</div></div>
@@ -52,22 +82,31 @@
                 <button class="btn btn-sm btn-primary" onclick="applyNow(${d.id})">Apply</button>
               </div>
             </div>`).join('');
+
+            pageno.textContent = page;
         }
+
+        async function search(e){
+            e && e.preventDefault();
+            page = 1;
+            load();
+        }
+
         async function applyNow(programId){
             const token = localStorage.getItem("token");
             const r = await fetch('/api/v1/apps', {
-                method:'POST', headers:{'Content-Type':'application/json' , 'Authorization':`Bearer ${token}`},
+                method:'POST',
+                headers:{'Content-Type':'application/json', 'Authorization':`Bearer ${token}`},
                 body: JSON.stringify({ programId })
             });
             const app = await r.json();
-            // go to the application page
             window.location.href = '/app/' + app.id;
         }
 
         async function checkEligibility(programId){
             try {
                 const token = localStorage.getItem("token");
-                const prof = await fetch('/api/v1/profile' , {headers: {'Authorization':`Bearer ${token}`}}).then(r=>r.ok?r.json():{});
+                const prof = await fetch('/api/v1/profile', {headers: {'Authorization':`Bearer ${token}`}}).then(r=>r.ok?r.json():{});
                 const req = {
                     gpa: (+prof.gpa) || 0,
                     ielts: (+prof.ielts) || 0,
@@ -78,7 +117,7 @@
                 const token2 = localStorage.getItem("token");
                 const res = await fetch('/api/v1/eligibility/check',{
                     method:'POST',
-                    headers:{'Content-Type':'application/json' , 'Authorization':`Bearer ${token2}` },
+                    headers:{'Content-Type':'application/json', 'Authorization':`Bearer ${token2}`},
                     body: JSON.stringify(req)
                 }).then(r=>r.json());
                 const r = res && res[0] ? res[0] : {score:0,eligible:false,reasons:['No data']};
@@ -93,8 +132,28 @@
             new bootstrap.Modal(document.getElementById('eligModal')).show();
         }
 
-        document.getElementById('filters').addEventListener('submit',search);
-        search();
+        // Event listeners
+        document.getElementById('filters').addEventListener('submit', search);
+
+        prev.onclick = (e) => {
+            e.preventDefault();
+            page = Math.max(1, page - 1);
+            load();
+        };
+
+        next.onclick = (e) => {
+            e.preventDefault();
+            page = page + 1;
+            load();
+        };
+
+        sort.onchange = dir.onchange = size.onchange = () => {
+            page = 1;
+            load();
+        };
+
+        // Initial load
+        load();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,24 +18,60 @@ public class StudentDashController {
 
     private static final long CURRENT_STUDENT = 1L; // TODO JWT later
 
-    @GetMapping("/apps")
-    public List<Map<String,Object>> myApps(
-            @RequestParam(required=false) String status,
-            @RequestParam(required=false) String q) {
 
-        String sql = """
-      select a.id as app_id, a.status, a.created_at,
-             p.title as program_title, u.name as university,
-             coalesce( (select max(e.created_at) from app_events e where e.application_id=a.id), a.created_at) as updated_at
-      from applications a
-      join programs p on p.id=a.program_id
-      join universities u on u.id=p.university_id
-      where a.student_id=?
-        and (?::text  is null or a.status = ?)
-        and (?::text  is null or p.title ILIKE ?)
-      order by updated_at desc
-      limit 200
-    """;
-        return j.queryForList(sql, CURRENT_STUDENT, status, status, q, q == null ? null : "%" + q + "%");
+    @GetMapping("/apps")
+    public List<Map<String, Object>> getApplications(
+            @RequestParam(required=false) String status,
+            @RequestParam(required=false) String country,
+            @RequestParam(required=false) String degree,
+            @RequestParam(required=false) Integer feeMax,
+            @RequestParam(required=false) String q,
+            @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="10") int size) {
+
+        int limit = Math.min(Math.max(size, 1), 50);
+        int offset = page * limit;
+
+        StringBuilder sql = new StringBuilder("""
+        select a.id, p.title, u.name as university, u.country, p.degree, a.status, a.created_at 
+        from applications a
+        join programs p on p.id = a.program_id
+        join universities u on u.id = p.university_id
+        where a.student_id = ?
+    """);
+
+        List<Object> params = new ArrayList<>();
+        params.add(CURRENT_STUDENT);
+
+        if (status != null && !status.isBlank()) {
+            sql.append(" and lower(a.status) = lower(?)");
+            params.add(status);
+        }
+
+        if (country != null && !country.isBlank()) {
+            sql.append(" and lower(u.country) = lower(?)");
+            params.add(country);
+        }
+
+        if (degree != null && !degree.isBlank()) {
+            sql.append(" and lower(p.degree) = lower(?)");
+            params.add(degree);
+        }
+
+        if (feeMax != null) {
+            sql.append(" and p.fee <= ?");
+            params.add(feeMax);
+        }
+
+        if (q != null && !q.isBlank()) {
+            sql.append(" and lower(p.title) like lower(?)");
+            params.add("%" + q + "%");
+        }
+
+        sql.append(" limit ? offset ?");
+        params.add(limit);
+        params.add(offset);
+
+        return j.queryForList(sql.toString(), params.toArray());
     }
 }

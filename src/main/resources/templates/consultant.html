@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" th:replace="layout :: layout(~{::content})">
 <head>
-   <title>Consultant Dashboard</title>
+    <title>Consultant Dashboard</title>
 </head>
 <body>
 <div th:fragment="content">
@@ -18,19 +18,56 @@
                 <button class="btn btn-sm btn-outline-secondary">Filter</button>
             </form>
         </div>
+
+        <div class="d-flex justify-content-between align-items-center my-3">
+            <div class="d-flex gap-2">
+                <select class="form-select form-select-sm" id="csort" style="width:150px">
+                    <option value="created_at">Date</option>
+                    <option value="status">Status</option>
+                    <option value="program_title">Program</option>
+                    <option value="university">University</option>
+                </select>
+                <select class="form-select form-select-sm" id="cdir" style="width:100px">
+                    <option value="desc">Desc</option>
+                    <option value="asc">Asc</option>
+                </select>
+                <select class="form-select form-select-sm" id="csize" style="width:80px">
+                    <option value="5">5</option>
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                </select>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-outline-secondary" id="cprev">&laquo; Prev</button>
+                <span id="cpageno">1</span>
+                <button class="btn btn-sm btn-outline-secondary" id="cnext">Next &raquo;</button>
+            </div>
+        </div>
+
         <div id="queue"></div>
     </main>
 
     <script>
+        let cpage = 0;
+
         async function loadQueue(e){
-          e && e.preventDefault();
-          const p=new URLSearchParams();
-          if(cstatus.value) p.append('status', cstatus.value);
-          if(cq.value) p.append('q', cq.value);
-          const token = localStorage.getItem("token");
-          const data = await fetch('/api/v1/consult/queue?'+p.toString(), { headers:{'Authorization':`Bearer ${token}`}}).then(r=>r.json());
-          // (render cards exactly like Day 6)
-          queue.innerHTML = data.length ? data.map(x => `
+            e && e.preventDefault();
+            const p=new URLSearchParams();
+            if(cstatus.value) p.append('status', cstatus.value);
+            if(cq.value) p.append('q', cq.value);
+            p.append('page', cpage);
+            p.append('size', csize.value);
+            p.append('sort', csort.value);
+            p.append('dir', cdir.value);
+
+            const token = localStorage.getItem("token");
+            const data = await fetch('/api/v1/consult/queue?'+p.toString(), {
+                headers:{'Authorization':`Bearer ${token}`}
+            }).then(r=>r.json());
+
+            cpageno.textContent = cpage + 1;
+
+            queue.innerHTML = data.length ? data.map(x => `
                 <div class="card p-3 mb-2">
                     <div class="d-flex justify-content-between">
                         <div>
@@ -52,12 +89,35 @@
             const token = localStorage.getItem("token");
             await fetch('/api/v1/consult/review', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' , headers:{'Authorization':`Bearer ${token}`},
+                headers: { 'Content-Type': 'application/json', 'Authorization':`Bearer ${token}` },
                 body: JSON.stringify({ applicationId: appId, decision, feedback })
-            }});
+            });
             await loadQueue();
         }
-        cfilters && cfilters.addEventListener('submit', loadQueue);
+
+        cprev.onclick = (e) => {
+            e.preventDefault();
+            cpage = Math.max(0, cpage - 1);
+            loadQueue();
+        };
+
+        cnext.onclick = (e) => {
+            e.preventDefault();
+            cpage = cpage + 1;
+            loadQueue();
+        };
+
+        cfilters.addEventListener('submit', (e) => {
+            e.preventDefault();
+            cpage = 0;
+            loadQueue();
+        });
+
+        csort.onchange = cdir.onchange = csize.onchange = () => {
+            cpage = 0;
+            loadQueue();
+        };
+
         loadQueue();
     </script>
 </div>

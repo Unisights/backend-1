@@ -3,6 +3,7 @@ package com.unisights.backend.admin;
 import com.unisights.backend.security.AdminGuard;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,8 +31,10 @@ public class AdminCatalogController {
     }
 
     // Programs
+    @Cacheable(value = "programs",  key = "#universityId")
     @GetMapping("/programs")
     public List<Map<String,Object>> progList(@RequestParam(required=false) Long universityId, HttpServletRequest req){
+        System.out.println("🔍 EXECUTING DATABASE QUERY - Cache MISS!");
         guard.requireAdmin(req);
         if(universityId==null) return j.queryForList("""
       select p.id,p.title,p.degree,p.fee,u.name as university from programs p join universities u on u.id=p.university_id order by p.id desc limit 200

@@ -14,13 +14,27 @@
         <form class="row g-2 my-3" id="sfilters">
             <div class="col-auto">
                 <select class="form-select" id="sstatus">
-                    <option value="">All</option>
+                    <option value="">All Status</option>
                     <option>DRAFT</option>
                     <option>SUBMITTED</option>
                     <option>REVIEW</option>
                     <option>ACCEPTED</option>
                     <option>REJECTED</option>
                 </select>
+            </div>
+            <div class="col-auto">
+                <input class="form-control" id="country" placeholder="Country">
+            </div>
+            <div class="col-auto">
+                <select class="form-select" id="degree">
+                    <option value="">All Degrees</option>
+                    <option>Bachelor</option>
+                    <option>Master</option>
+                    <option>PhD</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <input class="form-control" type="number" id="feeMax" placeholder="Max Fee">
             </div>
             <div class="col">
                 <input class="form-control" id="sq" placeholder="Search program">
@@ -30,23 +44,61 @@
             </div>
         </form>
 
+
+        <!-- Pagination and Sorting Controls -->
+        <form id="spager" class="d-flex align-items-center gap-2 mb-2">
+            <select id="ssort" class="form-select form-select-sm" style="width:160px">
+                <option value="updated_at">Updated</option>
+                <option value="created_at">Created</option>
+                <option value="status">Status</option>
+                <option value="program_title">Program</option>
+                <option value="university">University</option>
+            </select>
+            <select id="sdir" class="form-select form-select-sm" style="width:120px">
+                <option value="asc">Asc</option>
+                <option value="desc" selected>Desc</option>
+            </select>
+            <select id="ssize" class="form-select form-select-sm" style="width:100px">
+                <option>10</option>
+                <option>20</option>
+                <option>50</option>
+            </select>
+            <button class="btn btn-sm btn-outline-secondary" id="sprev" type="button">Prev</button>
+            <span id="spageno" class="small">1</span>
+            <button class="btn btn-sm btn-outline-secondary" id="snext" type="button">Next</button>
+        </form>
+
         <div id="slist"></div>
     </main>
 
     <script>
+        let spage = 0;
+
         async function loadS(e){
             e && e.preventDefault();
+
             const p = new URLSearchParams();
             if(sstatus.value) p.append('status', sstatus.value);
+            if(country.value) p.append('country', country.value);
+            if(degree.value) p.append('degree', degree.value);
+            if(feeMax.value) p.append('feeMax', feeMax.value);
             if(sq.value) p.append('q', sq.value);
+            p.append('page', spage);
+            p.append('size', ssize.value);
+            p.append('sort', ssort.value);
+            p.append('dir', sdir.value);
+
             const token = localStorage.getItem("token");
-            const data = await fetch('/api/v1/student/apps?' + p.toString() , {headers: {'Authorization':`Bearer ${token}`}}).then(r => r.json());
+            const data = await fetch('/api/v1/student/apps?' + p.toString(), {
+                headers: {'Authorization':`Bearer ${token}`}
+            }).then(r => r.json());
+
             slist.innerHTML = data.length ? data.map(x => `
                 <div class="card p-3 mb-2">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <b>${x.program_title}</b> — <span class="text-secondary">${x.university}</span>
-                            <div class="small text-secondary">Updated: ${new Date(x.updated_at).toLocaleString()}</div>
+                            <b>${x.title}</b> — <span class="text-secondary">${x.university}</span>
+                            <div class="small text-secondary">Updated: ${new Date(x.created_at).toLocaleString()}</div>
                         </div>
                         <span class="badge text-bg-secondary">${x.status}</span>
                     </div>
@@ -56,12 +108,39 @@
                     </div>
                 </div>
             `).join('') : `<div class="text-secondary">No applications yet.</div>`;
+
+            spageno.textContent = spage +1;
         }
 
-        sfilters.addEventListener('submit', loadS);
+        // Filter form submission - reset to page 0
+        sfilters.addEventListener('submit', (e) => {
+            e.preventDefault();
+            spage = 0;
+            loadS();
+        });
+
+        // Pagination controls
+        sprev.onclick = (e) => {
+            e.preventDefault();
+            spage = Math.max(0, spage - 1);
+            loadS();
+        };
+
+        snext.onclick = (e) => {
+            e.preventDefault();
+            spage = spage + 1;
+            loadS();
+        };
+
+        // Sort/size controls - reset to page 1
+        ssort.onchange = sdir.onchange = ssize.onchange = () => {
+            spage = 0;
+            loadS();
+        };
+
+        // Initial load
         loadS();
     </script>
 </div>
 </body>
 </html>
-

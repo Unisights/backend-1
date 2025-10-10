@@ -13,6 +13,8 @@ public class PageController {
     @GetMapping("/consultant") public String consultant() { return "consultant"; }
     @GetMapping("/student") public String student(){ return "student"; }
     @GetMapping("/admin") public String admin() { return "admin"; }
+    @GetMapping("/layout") public String layout() { return "layout"; }
+    @GetMapping("/home") public String home() { return "home"; }
 
 
 }

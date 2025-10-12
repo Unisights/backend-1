@@ -23,7 +23,7 @@ jobs:
 
       - name: Build & Push Docker Image
         run: |
-          docker build -t ghcr.io/unisights/unisights-backend:staging
+          docker build -t ghcr.io/unisights/unisights-backend:staging .
           docker push ghcr.io/unisights/unisights-backend:staging
 
   deploy:

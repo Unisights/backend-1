@@ -14,7 +14,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes: [miniodata:/data]
-    ports: ["9002:9000", "9003:9001"]
+    ports: ["9000:9000", "9001:9001"]
 
   backend:
     image: rakeshallampally960/unisights-backend:prod
@@ -22,12 +22,13 @@ services:
     depends_on: [db, minio]
     ports: ["8080:8080"]
 
-  nginx:
-    image: nginx:alpine
-    depends_on: [backend]
+  caddy:
+    image: caddy:2
+    depends_on:
+      - backend
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    ports: ["80:80"]
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    ports: ["80:80","443:443"]
 
 volumes:
   dbdata:

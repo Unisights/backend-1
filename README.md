@@ -30,3 +30,6 @@ Access key(login): minioadmin
 Secret key(pwd): minioadmin
 
 create bucket unisights.
+
+### for day 12
+docker compose -f 'docker-compose.staging.yml' --env-file .env.staging up -d backend

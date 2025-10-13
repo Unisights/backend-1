@@ -14,7 +14,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
     volumes: [miniodata:/data]
-    ports: ["9000:9000", "9001:9001"]
+    ports: ["9002:9000", "9003:9001"]
 
   backend:
     image: rakeshallampally960/unisights-backend:prod

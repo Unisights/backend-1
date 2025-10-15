@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 record SignupReq(String email,String password,String role){}
 record LoginReq(String email,String password){}
 record LoginRes(String token, List<String> role, Long userId){}
-@RestController @RequestMapping("/api/auth")
+@RestController @RequestMapping("/api/v1/auth")
 public class AuthController {
 
 

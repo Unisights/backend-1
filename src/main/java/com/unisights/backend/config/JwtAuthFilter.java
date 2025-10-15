@@ -30,7 +30,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
         // Skip JWT processing for auth endpoints
-        if (path.startsWith("/api/auth/") || path.equals("/auth/login") || path.equals("/auth/signup") || path.equals("/") || path.equals("/health")) {
+        if (path.startsWith("/api/v1/auth/") || path.equals("/auth/login") || path.equals("/auth/signup") || path.equals("/") || path.equals("/health")) {
             filterChain.doFilter(request, response);
             return;
         }

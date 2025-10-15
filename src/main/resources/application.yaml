@@ -42,4 +42,4 @@ storage:
     presignExpireSeconds: 300
 
 jwt:
-  secret: your-very-long-secret-key-at-least-256-bits-long-please-change-this-in-production
+  secret: "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890+/QWERTYUIOPASDFGHJKLZXCVBNM="

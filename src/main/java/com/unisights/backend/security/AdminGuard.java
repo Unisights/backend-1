@@ -7,8 +7,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AdminGuard {
-    private final JwtUtil jwt;
-    public AdminGuard(JwtUtil jwt){ this.jwt = jwt; }
+    private final JwtService jwt;
+    private final JwtService jwtService;
+
+    public AdminGuard(JwtService jwt, JwtService jwtService){ this.jwt = jwt;
+        this.jwtService = jwtService;
+    }
     public void requireAdmin(HttpServletRequest req){
         try {
             var auth = req.getHeader("Authorization");
@@ -16,11 +20,9 @@ public class AdminGuard {
             if(auth==null || !auth.startsWith("Bearer ")) throw new RuntimeException("no token");
             String token = auth.substring(7);
             System.out.println("Token: " + token);
-            Jws<Claims> parsed = jwt.parse(token);
-            System.out.println("Parsed: " + parsed);
-            String role = parsed.getBody().getSubject();
+            String role = jwtService.extractRoles(token).getFirst();
             System.out.println("Role: " + role);
-            if(!"ADMIN".equals(role)) throw new RuntimeException("forbidden");
+            if(!"ROLE_ADMIN".equals(role)) throw new RuntimeException("forbidden");
         } catch(Exception e){
             throw new RuntimeException("forbidden");
         }

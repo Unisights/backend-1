@@ -1,5 +1,6 @@
 package com.unisights.backend.controller;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/countries")
+@SecurityRequirement(name = "bearer-jwt")
 public class CountriesController {
     private final JdbcTemplate j;
     public CountriesController(JdbcTemplate j){ this.j=j; }

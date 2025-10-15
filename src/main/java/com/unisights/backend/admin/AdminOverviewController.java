@@ -12,6 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/admin/overview")
+@SecurityRequirement(name = "bearer-jwt")
 public class AdminOverviewController {
     private final JdbcTemplate j;
     private final AdminGuard guard;

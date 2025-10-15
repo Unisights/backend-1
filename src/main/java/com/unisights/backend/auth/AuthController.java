@@ -1,26 +1,42 @@
 package com.unisights.backend.auth;
 
-import com.unisights.backend.security.JwtUtil;
+import com.unisights.backend.config.UserInfoUserDetails;
+import com.unisights.backend.security.JwtService;
 import com.unisights.backend.user.User;
 import com.unisights.backend.user.UserRepository;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 record SignupReq(String email,String password,String role){}
 record LoginReq(String email,String password){}
-record LoginRes(String token,String role,Long userId){}
+record LoginRes(String token, List<String> role, Long userId){}
 @RestController @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final JwtUtil jwt;
+
 
     private final UserRepository repo;
 
     private final PasswordEncoder enc;
 
-    public AuthController(JwtUtil jwt, UserRepository r, PasswordEncoder e){
-        this.jwt = jwt;
-        this.repo=r; this.enc=e;}
+
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+
+    public AuthController( UserRepository r, PasswordEncoder e, AuthenticationManager authenticationManager, JwtService jwtService){
+
+        this.repo=r; this.enc=e;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
+    }
 
     @PostMapping("/signup") public String signup(@RequestBody SignupReq r){
         if(repo.findByEmail(r.email()).isPresent()) return "User exists";
@@ -45,14 +61,35 @@ public class AuthController {
 //        throw new RuntimeException("invalid credentials");
 //    }
 
-        @PostMapping("/login") public LoginRes login(@RequestBody LoginReq r){
-        var u=repo.findByEmail(r.email()).orElse(null);
+//        @PostMapping("/login") public LoginRes login(@RequestBody LoginReq r){
+//        var u=repo.findByEmail(r.email()).orElse(null);
+//
+//        if(u!=null && enc.matches(r.password(),u.getPassword_hash())){
+//            var token=jwt.generateToken(u.getRole().name(), u.getId());
+//            return new LoginRes(token,u.getRole().name(),u.getId());
+//        }
+//        throw new RuntimeException("invalid credentials");
+//    }
 
-        if(u!=null && enc.matches(r.password(),u.getPassword_hash())){
-            var token=jwt.generateToken(u.getRole().name(), u.getId());
-            return new LoginRes(token,u.getRole().name(),u.getId());
+    @PostMapping("/login")
+    public LoginRes authenticateAndGetToken(@RequestBody LoginReq authRequest) {
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.email(), authRequest.password()));
+        if (authentication.isAuthenticated()) {
+
+            UserInfoUserDetails principal = (UserInfoUserDetails) authentication.getPrincipal();
+            Long userId = principal.getId();
+            String email = principal.getUsername();
+            List<String> roles = principal.getAuthorities().stream()
+
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
+            // email used as subject
+            return new LoginRes(jwtService.generateToken(email, userId,roles), roles, userId);
+        } else {
+            throw new UsernameNotFoundException("invalid user request !");
         }
-        throw new RuntimeException("invalid credentials");
+
+
     }
 }
 

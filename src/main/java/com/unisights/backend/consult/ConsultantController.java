@@ -1,12 +1,14 @@
 package com.unisights.backend.consult;
 
 import com.unisights.backend.mail.MailService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/consult")
+@SecurityRequirement(name = "bearer-jwt")
 public class ConsultantController {
 
     private final JdbcTemplate j;

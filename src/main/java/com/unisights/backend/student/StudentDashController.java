@@ -1,5 +1,6 @@
 package com.unisights.backend.student;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/student")
+@SecurityRequirement(name = "bearer-jwt")
 public class StudentDashController {
     private final JdbcTemplate j;
     public StudentDashController(JdbcTemplate j){ this.j = j; }

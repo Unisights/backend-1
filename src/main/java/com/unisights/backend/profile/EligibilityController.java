@@ -1,5 +1,6 @@
 package com.unisights.backend.profile;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/eligibility")
+@SecurityRequirement(name = "bearer-jwt")
 public class EligibilityController {
     private final JdbcTemplate j;
     public EligibilityController(JdbcTemplate j){ this.j = j; }

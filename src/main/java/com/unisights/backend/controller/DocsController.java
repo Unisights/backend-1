@@ -4,6 +4,8 @@ import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.RemoveObjectArgs;
 import io.minio.http.Method;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/docs")
+@SecurityRequirement(name = "bearer-jwt")
 public class DocsController {
     private final MinioClient s3;
     private final JdbcTemplate j;
@@ -54,7 +57,9 @@ public class DocsController {
     }
 
     @GetMapping("/{appId}")
-    public List<Map<String,Object>> list(@PathVariable Long appId){
+    public List<Map<String,Object>> list(@PathVariable Long appId,  HttpServletRequest request){
+        String authHeader = request.getHeader("Authorization");
+        System.out.println("Auth Header: " + authHeader);
         return j.queryForList("""
       select id, storage_key, original_name, mime, size_bytes, created_at
       from app_files where application_id=? order by created_at desc

@@ -1,6 +1,7 @@
 package com.unisights.backend.controller;
 
 import com.unisights.backend.mail.MailService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,6 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/apps")
+@SecurityRequirement(name = "bearer-jwt")
 public class ApplicationController {
 
     private final JdbcTemplate j;
